@@ -1,0 +1,469 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>きょうのもちもの</title>
+<style>
+* { box-sizing:border-box; }
+body {
+  margin:0; padding:16px 12px 40px;
+  background:#fff8f3; color:#514b48;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
+}
+.app { max-width:520px; margin:auto; }
+h1 { text-align:center; font-size:24px; margin:8px 0 4px; }
+.today { text-align:center; color:#8b7168; font-size:15px; font-weight:bold; margin-bottom:17px; }
+
+.tabs { display:flex; gap:9px; margin-bottom:14px; }
+.tab {
+  flex:1; border:2px solid #f0e4dc; border-radius:13px;
+  background:white; padding:12px 4px; font-size:15px;
+  color:#81736c; cursor:pointer;
+}
+.tab.active { border-color:#f2ad9c; background:#fff0eb; color:#8b5549; font-weight:bold; }
+
+.panel {
+  background:white; border-radius:17px; padding:16px;
+  box-shadow:0 3px 14px #75513a0c; margin-bottom:13px;
+}
+.progress-heading { display:flex; justify-content:space-between; align-items:center; margin-bottom:9px; }
+.progress-heading strong { font-size:16px; }
+.progress-number { color:#9b8178; font-size:14px; font-weight:bold; }
+.bar { height:13px; background:#f4ece7; border-radius:20px; overflow:hidden; }
+.bar-fill { height:100%; width:0; background:#f2ad9c; border-radius:20px; transition:width .2s; }
+.progress-hint { font-size:12px; color:#a39790; margin:9px 0 0; }
+
+.cheer {
+  display:none; text-align:center; background:#fff0eb;
+  border-radius:15px; padding:20px 10px; margin-bottom:14px;
+}
+.cheer.show { display:block; }
+.cheer-title { color:#965e51; font-size:25px; font-weight:bold; }
+.cheer-message { color:#9b8178; font-size:13px; margin-top:5px; }
+
+.section-title { font-weight:bold; font-size:17px; margin:2px 0 13px; }
+.item {
+  display:flex; align-items:center; gap:9px;
+  padding:12px 9px; border:1px solid #f0e8e3;
+  border-radius:13px; margin-bottom:9px; background:#fffdfb;
+}
+.item.complete { opacity:.57; background:#f8f7f5; }
+.item-icon { font-size:27px; width:35px; text-align:center; flex-shrink:0; }
+.item-main { flex:1; min-width:0; }
+.item-name { font-weight:bold; font-size:15px; overflow-wrap:anywhere; }
+.item-note { font-size:12px; color:#9b8c84; margin-top:4px; overflow-wrap:anywhere; }
+.tap-btn {
+  border:0; border-radius:11px; padding:10px 8px;
+  min-width:83px; background:#fff0eb; color:#965e51;
+  font-weight:bold; font-size:13px; cursor:pointer;
+}
+.complete .tap-btn { background:#e9f2e9; color:#628264; }
+.actions { display:flex; flex-direction:column; gap:3px; }
+.small-btn { border:0; background:transparent; color:#a99b93; font-size:12px; padding:4px; cursor:pointer; }
+.empty { text-align:center; color:#a39790; padding:25px 5px; font-size:14px; }
+
+.add-title { font-weight:bold; margin-bottom:12px; }
+.add-grid { display:grid; grid-template-columns:65px 1fr 85px; gap:8px; }
+input, select {
+  border:1px solid #eaded7; border-radius:10px;
+  padding:11px; font-size:15px; background:#fffdfb;
+  color:#514b48; min-width:0;
+}
+.add-grid input, .add-grid select { width:100%; }
+.wide { grid-column:1 / -1; }
+.preset-row { display:flex; gap:8px; margin-bottom:12px; }
+.preset-row select { flex:1; width:100%; }
+.add-button, .reset-button, .settings-toggle {
+  width:100%; border:0; border-radius:12px; padding:13px;
+  font-size:15px; font-weight:bold; cursor:pointer;
+}
+.add-button { background:#f2ad9c; color:white; margin-top:10px; }
+.reset-button { background:#f5efeb; color:#8c7d75; margin-top:9px; }
+.settings-toggle { background:#f5efeb; color:#8c7d75; }
+.settings-content { display:none; margin-top:13px; }
+.settings-content.open { display:block; }
+.profile-title { font-weight:bold; font-size:14px; margin-bottom:10px; }
+.profile-row { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+#childName { flex:1; width:100px; }
+.gender-btn {
+  border:1px solid #eaded7; border-radius:10px;
+  padding:10px 9px; background:white; cursor:pointer; font-size:13px;
+}
+.gender-btn.active { background:#fff0eb; border-color:#f2ad9c; }
+.footer { text-align:center; color:#b4a69e; font-size:11px; margin-top:17px; }
+@media(max-width:360px) {
+  body { padding:12px 8px 30px; }
+  .item { gap:5px; padding:10px 6px; }
+  .tap-btn { min-width:72px; padding:9px 5px; }
+  .actions { gap:0; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>🎒 きょうのもちもの</h1>
+  <div class="today" id="todayDate"></div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <section class="panel">
+    <div class="progress-heading">
+      <strong>🌷 準備の進み具合</strong>
+      <span class="progress-number" id="progressText">0 / 0</span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="progressBar"></div></div>
+    <p class="progress-hint">持ち物をタップすると、準備した数が1つ増えます。</p>
+  </section>
+
+  <div class="cheer" id="cheer">
+    <div class="cheer-title">🌸 いってらっしゃい！</div>
+    <div class="cheer-message">ぜんぶ準備できました。今日も楽しい一日になりますように。</div>
+  </div>
+
+  <section class="panel">
+    <div class="section-title">📋 持ち物リスト</div>
+    <div id="items"></div>
+    <button class="reset-button" id="resetBtn">チェックをすべてリセット</button>
+  </section>
+
+  <section class="panel">
+    <div class="add-title">➕ 持ち物を追加</div>
+    <div class="preset-row">
+      <select id="presetSelect">
+        <option value="">よく使う持ち物から選ぶ</option>
+      </select>
+      <button class="gender-btn" id="presetBtn" type="button">選択</button>
+    </div>
+    <div class="add-grid">
+      <input id="newIcon" value="🎒" maxlength="4" aria-label="アイコン">
+      <input id="newName" placeholder="持ち物の名前" maxlength="30">
+      <input id="newQty" type="number" min="1" max="99" value="1" aria-label="必要な数">
+      <select id="newUnit" class="wide">
+        <option>個</option><option>枚</option><option>本</option>
+        <option>セット</option><option>組</option><option>足</option>
+        <option>着</option><option>袋</option><option>冊</option>
+      </select>
+      <input id="newNote" class="wide" placeholder="メモ（任意）" maxlength="80">
+    </div>
+    <button class="add-button" id="addBtn">この持ち物を追加する</button>
+  </section>
+
+  <section class="panel">
+    <button class="settings-toggle" id="settingsToggle">⚙️ 子どもの設定を開く</button>
+    <div class="settings-content" id="settingsContent">
+      <div class="profile-title">お名前</div>
+      <div class="profile-row">
+        <input id="childName" maxlength="20" placeholder="お名前">
+      </div>
+      <div class="profile-title" style="margin-top:14px">アイコン</div>
+      <div class="profile-row">
+        <button class="gender-btn" id="boyBtn" type="button">👦 男の子</button>
+        <button class="gender-btn" id="girlBtn" type="button">👧 女の子</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">入力内容はこの端末に自動保存されます</div>
+</div>
+
+<script>
+const STORAGE_KEY = "kindergarten-check-v2";
+const LAST_DATE_KEY = "kindergarten-check-last-date";
+
+const defaultData = {
+  children: [
+    {name:"子ども①", gender:"boy", items:[
+      {id:1,icon:"🎒",name:"通園バッグ",note:"",quantity:1,unit:"個",count:0},
+      {id:2,icon:"🥤",name:"水筒",note:"",quantity:1,unit:"個",count:0},
+      {id:3,icon:"🧻",name:"ハンカチ",note:"",quantity:1,unit:"枚",count:0}
+    ]},
+    {name:"子ども②", gender:"girl", items:[
+      {id:4,icon:"🎒",name:"通園バッグ",note:"",quantity:1,unit:"個",count:0},
+      {id:5,icon:"🥤",name:"水筒",note:"",quantity:1,unit:"個",count:0},
+      {id:6,icon:"🧻",name:"ハンカチ",note:"",quantity:1,unit:"枚",count:0}
+    ]}
+  ]
+};
+
+const presets = [
+  ["🎒","通園バッグ","個"],["📓","連絡帳","冊"],["📔","出席ノート","冊"],
+  ["🏷️","名札","個"],["👕","着替え","セット"],["👚","シャツ","枚"],
+  ["👖","ズボン","枚"],["🩲","肌着","枚"],["🧦","靴下","足"],
+  ["🧥","上着","枚"],["🧢","帽子","個"],["👟","靴","足"],
+  ["👞","上履き","足"],["🩴","サンダル","足"],
+  ["🧻","ハンカチ","枚"],["🧻","ティッシュ","個"],
+  ["🧺","タオル","枚"],["🧼","おしぼり","枚"],
+  ["🪥","歯ブラシ","本"],["🥛","コップ","個"],
+  ["🦷","歯磨き粉","個"],["😷","マスク","枚"],
+  ["🥤","水筒","個"],["🍱","お弁当箱","個"],
+  ["🥢","箸","組"],["🥄","スプーン","本"],
+  ["🍴","フォーク","本"],["🍽️","ランチョンマット","枚"],
+  ["👶","エプロン","枚"],["🍼","よだれかけ","枚"],
+  ["🛍️","巾着袋","枚"],["🛍️","ビニール袋","枚"],
+  ["🧷","おむつ","枚"],["🧻","おしりふき","個"],
+  ["🌂","傘","本"],["🧥","レインコート","枚"],
+  ["🥾","長靴","足"],["🏊","水着","セット"],
+  ["🏖️","プールバッグ","個"],["🩱","水泳帽","個"],
+  ["🧴","日焼け止め","個"],["🧣","防寒具","枚"],
+  ["🧸","お気に入りのおもちゃ","個"],["📁","作品入れ","個"],
+  ["🧺","お昼寝用タオル","枚"],["🛏️","シーツ","枚"]
+];
+
+function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+function loadData() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!saved || !Array.isArray(saved.children)) return clone(defaultData);
+    saved.children = saved.children.slice(0,2);
+    while (saved.children.length < 2) {
+      saved.children.push(clone(defaultData.children[saved.children.length]));
+    }
+    saved.children.forEach((child,index) => {
+      child.name = child.name || `子ども${index+1}`;
+      child.gender = child.gender || (index===0 ? "boy" : "girl");
+      if (!Array.isArray(child.items)) child.items = [];
+      child.items.forEach(item => {
+        item.quantity = Math.max(1,Number(item.quantity)||1);
+        item.unit = item.unit || "個";
+        item.count = Math.max(0,Math.min(item.quantity,
+          Number(item.count ?? (item.done ? item.quantity : 0)) || 0));
+        item.note = item.note || "";
+        item.icon = item.icon || "🎒";
+      });
+    });
+    return saved;
+  } catch(e) {
+    return clone(defaultData);
+  }
+}
+
+let data = loadData();
+let activeChild = 0;
+
+function save() {
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+}
+
+function currentChild() { return data.children[activeChild]; }
+
+function dateString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function displayDate() {
+  const d = new Date();
+  const days = ["日","月","火","水","木","金","土"];
+  document.getElementById("todayDate").textContent =
+    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）`;
+}
+
+function checkDateReset() {
+  const today = dateString();
+  const last = localStorage.getItem(LAST_DATE_KEY);
+  if (last && last !== today) {
+    data.children.forEach(child => child.items.forEach(item => item.count = 0));
+    save();
+    render();
+  }
+  localStorage.setItem(LAST_DATE_KEY,today);
+  displayDate();
+}
+
+function render() {
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
+  data.children.forEach((child,i) => {
+    const button = document.createElement("button");
+    button.className = "tab" + (i===activeChild ? " active" : "");
+    button.textContent = `${child.gender==="girl" ? "👧" : "👦"} ${child.name}`;
+    button.onclick = () => { activeChild=i; render(); };
+    tabs.appendChild(button);
+  });
+
+  const child = currentChild();
+  const total = child.items.reduce((s,item)=>s+item.quantity,0);
+  const done = child.items.reduce((s,item)=>s+item.count,0);
+  document.getElementById("progressText").textContent = `${done} / ${total}`;
+  document.getElementById("progressBar").style.width =
+    total ? `${done/total*100}%` : "0%";
+
+  const allDone = child.items.length>0 && done===total;
+  document.getElementById("cheer").classList.toggle("show",allDone);
+
+  const list = document.getElementById("items");
+  list.innerHTML = "";
+  if (!child.items.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "持ち物がまだありません。下から追加してください。";
+    list.appendChild(empty);
+  }
+
+  const sorted = [...child.items].sort((a,b) =>
+    Number(a.count>=a.quantity)-Number(b.count>=b.quantity)
+  );
+
+  sorted.forEach(item => {
+    const complete = item.count>=item.quantity;
+    const row = document.createElement("div");
+    row.className = "item" + (complete ? " complete" : "");
+
+    const icon = document.createElement("div");
+    icon.className = "item-icon";
+    icon.textContent = item.icon;
+
+    const main = document.createElement("div");
+    main.className = "item-main";
+    const name = document.createElement("div");
+    name.className = "item-name";
+    name.textContent = item.name;
+    const note = document.createElement("div");
+    note.className = "item-note";
+    note.textContent = `${item.count} / ${item.quantity}${item.unit}` +
+      (item.note ? `　${item.note}` : "");
+    main.append(name,note);
+
+    const tap = document.createElement("button");
+    tap.className = "tap-btn";
+    tap.textContent = complete ? "✓ 完了" : `＋ ${item.count}/${item.quantity}`;
+    tap.setAttribute("aria-label",`${item.name}の準備数を増やす`);
+    tap.onclick = () => {
+      item.count = complete ? 0 : item.count+1;
+      save();
+      render();
+    };
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+    const edit = document.createElement("button");
+    edit.className = "small-btn";
+    edit.textContent = "編集";
+    edit.onclick = () => editItem(item);
+    const del = document.createElement("button");
+    del.className = "small-btn";
+    del.textContent = "削除";
+    del.onclick = () => {
+      if (confirm(`「${item.name}」を削除しますか？`)) {
+        child.items = child.items.filter(x=>x.id!==item.id);
+        save(); render();
+      }
+    };
+    actions.append(edit,del);
+    row.append(icon,main,tap,actions);
+    list.appendChild(row);
+  });
+
+  document.getElementById("childName").value = child.name;
+  document.getElementById("boyBtn").classList.toggle("active",child.gender==="boy");
+  document.getElementById("girlBtn").classList.toggle("active",child.gender==="girl");
+}
+
+function editItem(item) {
+  const name = prompt("持ち物の名前",item.name);
+  if (name===null) return;
+  if (!name.trim()) { alert("名前を入力してください。"); return; }
+  const icon = prompt("アイコン（絵文字）",item.icon);
+  if (icon===null) return;
+  const qtyText = prompt("必要な数（1〜99）",String(item.quantity));
+  if (qtyText===null) return;
+  const qty = Number(qtyText);
+  if (!Number.isInteger(qty)||qty<1||qty>99) {
+    alert("必要な数は1〜99の整数で入力してください。"); return;
+  }
+  const unit = prompt("単位（例：個、枚、本、セット）",item.unit);
+  if (unit===null) return;
+  const note = prompt("メモ（不要なら空欄）",item.note||"");
+  if (note===null) return;
+  item.name = name.trim();
+  item.icon = icon.trim()||"🎒";
+  item.quantity = qty;
+  item.unit = unit.trim()||"個";
+  item.note = note.trim();
+  item.count = Math.min(item.count,qty);
+  save(); render();
+}
+
+presets.forEach((p,i) => {
+  const option = document.createElement("option");
+  option.value = i;
+  option.textContent = `${p[0]} ${p[1]}`;
+  document.getElementById("presetSelect").appendChild(option);
+});
+
+document.getElementById("presetBtn").onclick = () => {
+  const value = document.getElementById("presetSelect").value;
+  if (value==="") { alert("持ち物を選んでください。"); return; }
+  const [icon,name,unit] = presets[Number(value)];
+  document.getElementById("newIcon").value = icon;
+  document.getElementById("newName").value = name;
+  document.getElementById("newQty").value = 1;
+  document.getElementById("newUnit").value = unit;
+  document.getElementById("newName").focus();
+};
+
+document.getElementById("addBtn").onclick = () => {
+  const name = document.getElementById("newName").value.trim();
+  const quantity = Number(document.getElementById("newQty").value);
+  if (!name) { alert("持ち物の名前を入力してください。"); return; }
+  if (!Number.isInteger(quantity)||quantity<1||quantity>99) {
+    alert("必要な数は1〜99で入力してください。"); return;
+  }
+  currentChild().items.push({
+    id:Date.now()+Math.random(),
+    icon:document.getElementById("newIcon").value.trim()||"🎒",
+    name,
+    quantity,
+    unit:document.getElementById("newUnit").value,
+    note:document.getElementById("newNote").value.trim(),
+    count:0
+  });
+  document.getElementById("newName").value = "";
+  document.getElementById("newIcon").value = "🎒";
+  document.getElementById("newQty").value = "1";
+  document.getElementById("newNote").value = "";
+  document.getElementById("presetSelect").value = "";
+  save(); render();
+};
+
+document.getElementById("childName").addEventListener("change",e => {
+  currentChild().name = e.target.value.trim()||`子ども${activeChild+1}`;
+  save(); render();
+});
+document.getElementById("boyBtn").onclick = () => {
+  currentChild().gender = "boy"; save(); render();
+};
+document.getElementById("girlBtn").onclick = () => {
+  currentChild().gender = "girl"; save(); render();
+};
+
+document.getElementById("settingsToggle").onclick = () => {
+  const content = document.getElementById("settingsContent");
+  const open = content.classList.toggle("open");
+  document.getElementById("settingsToggle").textContent =
+    open ? "⚙️ 子どもの設定を閉じる" : "⚙️ 子どもの設定を開く";
+};
+
+document.getElementById("resetBtn").onclick = () => {
+  if (!confirm("この子の準備チェックをすべてリセットしますか？")) return;
+  currentChild().items.forEach(item=>item.count=0);
+  save(); render();
+};
+
+displayDate();
+checkDateReset();
+render();
+
+setInterval(() => {
+  const before = localStorage.getItem(LAST_DATE_KEY);
+  checkDateReset();
+  if (before !== dateString()) displayDate();
+},30000);
+
+window.addEventListener("focus",checkDateReset);
+</script>
+</body>
+</html>
