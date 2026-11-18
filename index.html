@@ -15,7 +15,6 @@ body {
 .app { max-width:520px; margin:auto; }
 h1 { text-align:center; font-size:24px; margin:8px 0 4px; }
 .today { text-align:center; color:#8b7168; font-size:15px; font-weight:bold; margin-bottom:17px; }
-
 .tabs { display:flex; gap:9px; margin-bottom:14px; }
 .tab {
   flex:1; border:2px solid #f0e4dc; border-radius:13px;
@@ -23,7 +22,6 @@ h1 { text-align:center; font-size:24px; margin:8px 0 4px; }
   color:#81736c; cursor:pointer;
 }
 .tab.active { border-color:#f2ad9c; background:#fff0eb; color:#8b5549; font-weight:bold; }
-
 .panel {
   background:white; border-radius:17px; padding:16px;
   box-shadow:0 3px 14px #75513a0c; margin-bottom:13px;
@@ -34,7 +32,6 @@ h1 { text-align:center; font-size:24px; margin:8px 0 4px; }
 .bar { height:13px; background:#f4ece7; border-radius:20px; overflow:hidden; }
 .bar-fill { height:100%; width:0; background:#f2ad9c; border-radius:20px; transition:width .2s; }
 .progress-hint { font-size:12px; color:#a39790; margin:9px 0 0; }
-
 .cheer {
   display:none; text-align:center; background:#fff0eb;
   border-radius:15px; padding:20px 10px; margin-bottom:14px;
@@ -42,7 +39,6 @@ h1 { text-align:center; font-size:24px; margin:8px 0 4px; }
 .cheer.show { display:block; }
 .cheer-title { color:#965e51; font-size:25px; font-weight:bold; }
 .cheer-message { color:#9b8178; font-size:13px; margin-top:5px; }
-
 .section-title { font-weight:bold; font-size:17px; margin:2px 0 13px; }
 .item {
   display:flex; align-items:center; gap:9px;
@@ -63,7 +59,6 @@ h1 { text-align:center; font-size:24px; margin:8px 0 4px; }
 .actions { display:flex; flex-direction:column; gap:3px; }
 .small-btn { border:0; background:transparent; color:#a99b93; font-size:12px; padding:4px; cursor:pointer; }
 .empty { text-align:center; color:#a39790; padding:25px 5px; font-size:14px; }
-
 .add-title { font-weight:bold; margin-bottom:12px; }
 .add-grid { display:grid; grid-template-columns:65px 1fr 85px; gap:8px; }
 input, select {
@@ -75,7 +70,7 @@ input, select {
 .wide { grid-column:1 / -1; }
 .preset-row { display:flex; gap:8px; margin-bottom:12px; }
 .preset-row select { flex:1; width:100%; }
-.add-button, .reset-button, .settings-toggle, .share-button, .import-button {
+.add-button, .reset-button, .settings-toggle, .share-button {
   width:100%; border:0; border-radius:12px; padding:13px;
   font-size:15px; font-weight:bold; cursor:pointer;
 }
@@ -92,8 +87,7 @@ input, select {
   padding:10px 9px; background:white; cursor:pointer; font-size:13px;
 }
 .gender-btn.active { background:#fff0eb; border-color:#f2ad9c; }
-.share-button { background:#e9f2e9; color:#557b58; margin-top:10px; }
-.import-button { background:#f5efeb; color:#8c7d75; margin-top:9px; }
+.share-button { background:#e9f2e9; color:#557b58; margin-top:8px; }
 .transfer-note { color:#9b8c84; font-size:12px; line-height:1.7; margin:10px 0 0; }
 .footer { text-align:center; color:#b4a69e; font-size:11px; margin-top:17px; }
 @media(max-width:360px) {
@@ -171,12 +165,10 @@ input, select {
 
   <section class="panel">
     <div class="section-title">📤 家族に設定を共有</div>
-    <button class="share-button" id="shareBtn">LINEなどで設定を共有する</button>
-    <button class="import-button" id="importBtn">受け取った設定を読み込む</button>
-    <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <button class="share-button" id="shareBtn">LINEで設定を共有する</button>
     <p class="transfer-note">
-      ママの端末で「設定を共有」を押し、共有先からLINEを選んでパパに送ってください。<br>
-      パパは受け取ったファイルを保存し、「設定を読み込む」から取り込めます。
+      ママが共有ボタンを押してLINEで送信。パパは届いたURLを開くだけで設定を取り込めます。<br>
+      取り込み前に確認画面が表示されます。
     </p>
   </section>
 
@@ -570,12 +562,11 @@ document.getElementById("resetBtn").onclick = () => {
   render();
 };
 
-/* 設定を共有するためのファイルを作成 */
-function makeSettingsFile() {
-  const exportData = {
+/* 設定データをURL用にまとめる */
+function makeShareData() {
+  return {
     app:"kindergarten-check",
-    version:2,
-    exportedAt:new Date().toISOString(),
+    version:3,
     children:data.children.map(child => ({
       name:child.name,
       gender:child.gender,
@@ -589,118 +580,188 @@ function makeSettingsFile() {
       }))
     }))
   };
-
-  const blob = new Blob(
-    [JSON.stringify(exportData,null,2)],
-    {type:"application/json"}
-  );
-
-  const date = new Date();
-  const dateText = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,"0")}${String(date.getDate()).padStart(2,"0")}`;
-  const file = new File(
-    [blob],
-    `もちもの設定-${dateText}.json`,
-    {type:"application/json"}
-  );
-
-  return {blob,file};
 }
 
-function downloadSettings(blob,fileName) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-}
+/* バイト列をURLで使える文字列に変換 */
+function bytesToBase64Url(bytes) {
+  let binary = "";
+  const chunkSize = 0x8000;
 
-document.getElementById("shareBtn").onclick = async () => {
-  const {blob,file} = makeSettingsFile();
-
-  if (navigator.share && navigator.canShare &&
-      navigator.canShare({files:[file]})) {
-    try {
-      await navigator.share({
-        files:[file],
-        title:"きょうのもちもの設定",
-        text:"持ち物リストの設定を共有します。"
-      });
-    } catch(error) {
-      if (error.name!=="AbortError") {
-        downloadSettings(blob,file.name);
-        alert("共有できなかったため、設定ファイルを保存しました。LINEに添付して送ってください。");
-      }
-    }
-  } else {
-    downloadSettings(blob,file.name);
-    alert("この端末では直接共有できないため、設定ファイルを保存しました。LINEに添付して送ってください。");
+  for (let i=0; i<bytes.length; i+=chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i,i+chunkSize));
   }
-};
 
-/* 受け取った設定ファイルを読み込む */
-document.getElementById("importBtn").onclick = () => {
-  document.getElementById("importFile").click();
-};
+  return btoa(binary)
+    .replace(/\+/g,"-")
+    .replace(/\//g,"_")
+    .replace(/=+$/,"");
+}
 
-document.getElementById("importFile").onchange = async event => {
-  const file = event.target.files[0];
-  if (!file) return;
+/* URL用文字列をバイト列に戻す */
+function base64UrlToBytes(text) {
+  const base64 = text.replace(/-/g,"+").replace(/_/g,"/");
+  const padded = base64 + "=".repeat((4-base64.length%4)%4);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i=0; i<binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+/* データをgzip圧縮してURLを作る */
+async function createShareUrl() {
+  if (!window.CompressionStream) {
+    throw new Error("このブラウザはURL圧縮に対応していません。ブラウザを最新版に更新してください。");
+  }
+
+  const json = JSON.stringify(makeShareData());
+  const input = new TextEncoder().encode(json);
+
+  const stream = new Blob([input])
+    .stream()
+    .pipeThrough(new CompressionStream("gzip"));
+
+  const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
+  const encoded = bytesToBase64Url(compressed);
+
+  return `${location.origin}${location.pathname}#setup=${encoded}`;
+}
+
+/* URLのデータを読み込む */
+async function readShareData(encoded) {
+  if (!window.DecompressionStream) {
+    throw new Error("このブラウザはURLの読み込みに対応していません。最新版のブラウザで開いてください。");
+  }
+
+  const bytes = base64UrlToBytes(encoded);
+  const stream = new Blob([bytes])
+    .stream()
+    .pipeThrough(new DecompressionStream("gzip"));
+
+  const json = await new Response(stream).text();
+  return JSON.parse(json);
+}
+
+/* 受け取った設定の内容を確認する */
+function validateImportedData(imported) {
+  if (!imported || imported.app!=="kindergarten-check" ||
+      !Array.isArray(imported.children) ||
+      imported.children.length!==2) {
+    throw new Error("設定URLの形式が正しくありません。");
+  }
+
+  return imported.children.map((child,index) => {
+    if (!Array.isArray(child.items)) {
+      throw new Error("持ち物リストが読み取れません。");
+    }
+
+    return {
+      name:String(child.name || `子ども${index+1}`).slice(0,20),
+      gender:child.gender==="girl" ? "girl" : "boy",
+      items:child.items.map(item => {
+        const quantity = Number(item.quantity);
+
+        if (!Number.isInteger(quantity)||quantity<1||quantity>99) {
+          throw new Error("持ち物の個数に不正な値があります。");
+        }
+
+        return normalizeItem({
+          ...item,
+          quantity,
+          count:0
+        });
+      })
+    };
+  });
+}
+
+/* URLを開いたときに設定があれば取り込む */
+async function importFromUrl() {
+  const match = location.hash.match(/(?:^#|&)setup=([^&]+)/);
+  if (!match) return;
+
+  const encoded = match[1];
 
   try {
-    const text = await file.text();
-    const imported = JSON.parse(text);
+    const imported = await readShareData(encoded);
+    const newChildren = validateImportedData(imported);
 
-    if (!imported || !Array.isArray(imported.children) ||
-        imported.children.length!==2) {
-      throw new Error("設定ファイルの形式が正しくありません。");
+    const itemCount = newChildren.reduce(
+      (sum,child)=>sum+child.items.length,0
+    );
+
+    const message =
+      `${newChildren[0].name}・${newChildren[1].name}の設定を受け取りました。\n`+
+      `持ち物は合計${itemCount}件です。\n\n`+
+      `今の端末の設定を置き換えて取り込みますか？`;
+
+    if (confirm(message)) {
+      data.children = newChildren;
+      activeChild = 0;
+      save();
+      render();
+      alert("設定を取り込みました。持ち物のチェックは未完了になっています。");
     }
-
-    const newChildren = imported.children.map((child,index) => {
-      if (!Array.isArray(child.items)) {
-        throw new Error("持ち物リストが読み取れません。");
-      }
-
-      return {
-        name:String(child.name || `子ども${index+1}`).slice(0,20),
-        gender:child.gender==="girl" ? "girl" : "boy",
-        items:child.items.map(item => {
-          const quantity = Number(item.quantity);
-          if (!Number.isInteger(quantity)||quantity<1||quantity>99) {
-            throw new Error("持ち物の個数に不正な値があります。");
-          }
-
-          return normalizeItem({
-            ...item,
-            quantity,
-            count:0
-          });
-        })
-      };
-    });
-
-    if (!confirm("今の2人分の設定を、受け取った設定に置き換えますか？")) {
-      event.target.value = "";
-      return;
-    }
-
-    data.children = newChildren;
-    activeChild = 0;
-    save();
-    render();
-    alert("設定を読み込みました。持ち物のチェックは未完了に戻しています。");
   } catch(error) {
-    alert("設定ファイルを読み込めませんでした。\n" + error.message);
+    alert("設定を読み込めませんでした。\n"+error.message);
+  } finally {
+    history.replaceState(
+      null,
+      "",
+      location.pathname + location.search
+    );
   }
+}
 
-  event.target.value = "";
+/* LINEなどにURLを共有 */
+document.getElementById("shareBtn").onclick = async () => {
+  const button = document.getElementById("shareBtn");
+  button.disabled = true;
+  button.textContent = "共有URLを作成しています…";
+
+  try {
+    const url = await createShareUrl();
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title:"きょうのもちもの設定",
+          text:"このURLを開くと、持ち物設定を取り込めます。",
+          url
+        });
+      } catch(error) {
+        if (error.name!=="AbortError") {
+          await copyShareUrl(url);
+        }
+      }
+    } else {
+      await copyShareUrl(url);
+    }
+  } catch(error) {
+    alert("共有URLを作成できませんでした。\n"+error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "LINEで設定を共有する";
+  }
 };
+
+async function copyShareUrl(url) {
+  try {
+    await navigator.clipboard.writeText(url);
+    alert("共有URLをコピーしました。\nLINEのトーク画面に貼り付けて送信してください。");
+  } catch(error) {
+    prompt("このURLをコピーしてLINEで送ってください。",url);
+  }
+}
 
 displayDate();
 checkDateReset();
 render();
+
+/* ページを開いたときに共有URLがあれば読み込む */
+importFromUrl();
 
 setInterval(() => {
   const before = localStorage.getItem(LAST_DATE_KEY);
