@@ -3,1113 +3,712 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#172b4d">
-<title>パパにおまかせ！朝の支度</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>きょうのもちもの</title>
 <style>
-:root {
-  --navy: #172b4d;
-  --navy2: #263f65;
-  --yellow: #ffd447;
-  --bg: #f3f6fa;
-  --white: #fff;
-  --text: #202c3c;
-  --muted: #718096;
-  --green: #23865b;
-  --border: #e1e7ef;
-}
-* { box-sizing: border-box; }
-
+* { box-sizing:border-box; }
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont,
-    "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
+  margin:0; padding:16px 12px 40px;
+  background:#fff8f3; color:#514b48;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
 }
+.app { max-width:520px; margin:auto; }
+h1 { text-align:center; font-size:24px; margin:8px 0 4px; }
+.today { text-align:center; color:#8b7168; font-size:15px; font-weight:bold; margin-bottom:17px; }
 
-header {
-  background: var(--navy);
-  color: white;
-  padding: 24px 16px;
-  text-align: center;
+.tabs { display:flex; gap:9px; margin-bottom:14px; }
+.tab {
+  flex:1; border:2px solid #f0e4dc; border-radius:13px;
+  background:white; padding:12px 4px; font-size:15px;
+  color:#81736c; cursor:pointer;
 }
-header h1 {
-  font-size: 24px;
-  margin: 0;
-}
-header p {
-  color: #dce5f1;
-  font-size: 13px;
-  margin: 9px 0 0;
-}
+.tab.active { border-color:#f2ad9c; background:#fff0eb; color:#8b5549; font-weight:bold; }
 
-main {
-  max-width: 650px;
-  margin: auto;
-  padding: 16px 14px 45px;
+.panel {
+  background:white; border-radius:17px; padding:16px;
+  box-shadow:0 3px 14px #75513a0c; margin-bottom:13px;
 }
+.progress-heading { display:flex; justify-content:space-between; align-items:center; margin-bottom:9px; }
+.progress-heading strong { font-size:16px; }
+.progress-number { color:#9b8178; font-size:14px; font-weight:bold; }
+.bar { height:13px; background:#f4ece7; border-radius:20px; overflow:hidden; }
+.bar-fill { height:100%; width:0; background:#f2ad9c; border-radius:20px; transition:width .2s; }
+.progress-hint { font-size:12px; color:#a39790; margin:9px 0 0; }
 
-.today {
-  text-align: center;
-  color: var(--muted);
-  font-size: 14px;
-  margin: 4px 0 16px;
+.cheer {
+  display:none; text-align:center; background:#fff0eb;
+  border-radius:15px; padding:20px 10px; margin-bottom:14px;
 }
+.cheer.show { display:block; }
+.cheer-title { color:#965e51; font-size:25px; font-weight:bold; }
+.cheer-message { color:#9b8178; font-size:13px; margin-top:5px; }
 
-.child-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 9px;
-  margin-bottom: 15px;
+.section-title { font-weight:bold; font-size:17px; margin:2px 0 13px; }
+.item {
+  display:flex; align-items:center; gap:9px;
+  padding:12px 9px; border:1px solid #f0e8e3;
+  border-radius:13px; margin-bottom:9px; background:#fffdfb;
 }
-.child-tab {
-  background: white;
-  border: 2px solid var(--border);
-  color: var(--navy);
-  border-radius: 14px;
-  padding: 14px 8px;
-  font-size: 17px;
-  font-weight: 900;
-  cursor: pointer;
+.item.complete { opacity:.57; background:#f8f7f5; }
+.item-icon { font-size:27px; width:35px; text-align:center; flex-shrink:0; }
+.item-main { flex:1; min-width:0; }
+.item-name { font-weight:bold; font-size:15px; overflow-wrap:anywhere; }
+.item-note { font-size:12px; color:#9b8c84; margin-top:4px; overflow-wrap:anywhere; }
+.tap-btn {
+  border:0; border-radius:11px; padding:10px 8px;
+  min-width:83px; background:#fff0eb; color:#965e51;
+  font-weight:bold; font-size:13px; cursor:pointer;
 }
-.child-tab.active {
-  background: var(--navy);
-  color: white;
-  border-color: var(--navy);
-}
+.complete .tap-btn { background:#e9f2e9; color:#628264; }
+.actions { display:flex; flex-direction:column; gap:3px; }
+.small-btn { border:0; background:transparent; color:#a99b93; font-size:12px; padding:4px; cursor:pointer; }
+.empty { text-align:center; color:#a39790; padding:25px 5px; font-size:14px; }
 
-.profile-area {
-  margin-bottom: 16px;
+.add-title { font-weight:bold; margin-bottom:12px; }
+.add-grid { display:grid; grid-template-columns:65px 1fr 85px; gap:8px; }
+input, select {
+  border:1px solid #eaded7; border-radius:10px;
+  padding:11px; font-size:15px; background:#fffdfb;
+  color:#514b48; min-width:0;
 }
-.profile-toggle {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  background: white;
-  color: var(--navy);
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
+.add-grid input, .add-grid select { width:100%; }
+.wide { grid-column:1 / -1; }
+.preset-row { display:flex; gap:8px; margin-bottom:12px; }
+.preset-row select { flex:1; width:100%; }
+.add-button, .reset-button, .settings-toggle, .share-button, .import-button {
+  width:100%; border:0; border-radius:12px; padding:13px;
+  font-size:15px; font-weight:bold; cursor:pointer;
 }
-.profile-panel {
-  display: none;
-  background: white;
-  padding: 15px;
-  border-radius: 12px;
-  margin-top: 8px;
+.add-button { background:#f2ad9c; color:white; margin-top:10px; }
+.reset-button { background:#f5efeb; color:#8c7d75; margin-top:9px; }
+.settings-toggle { background:#f5efeb; color:#8c7d75; }
+.settings-content { display:none; margin-top:13px; }
+.settings-content.open { display:block; }
+.profile-title { font-weight:bold; font-size:14px; margin-bottom:10px; }
+.profile-row { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+#childName { flex:1; width:100px; }
+.gender-btn {
+  border:1px solid #eaded7; border-radius:10px;
+  padding:10px 9px; background:white; cursor:pointer; font-size:13px;
 }
-.profile-panel.open { display: block; }
-
-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--navy);
-  margin: 9px 0 5px;
-}
-input, textarea, select {
-  width: 100%;
-  border: 1px solid #d5dce6;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 16px;
-  background: white;
-  color: var(--text);
-  font-family: inherit;
-}
-textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-input[type="number"] { min-width: 0; }
-
-.icon-options {
-  display: flex;
-  gap: 9px;
-  margin-top: 7px;
-}
-.icon-option {
-  width: 48px;
-  height: 48px;
-  border: 2px solid var(--border);
-  background: white;
-  border-radius: 12px;
-  font-size: 24px;
-  cursor: pointer;
-}
-.icon-option.selected {
-  border-color: var(--yellow);
-  background: #fff8df;
-}
-
-.progress-card {
-  background: white;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px #172b4d0c;
-}
-.progress-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-weight: 900;
-  color: var(--navy);
-}
-.progress-track {
-  height: 12px;
-  background: #e8edf3;
-  border-radius: 20px;
-  overflow: hidden;
-  margin-top: 12px;
-}
-.progress-fill {
-  height: 100%;
-  width: 0;
-  background: var(--yellow);
-  border-radius: 20px;
-  transition: width .25s;
-}
-
-.section-title {
-  font-size: 17px;
-  color: var(--navy);
-  font-weight: 900;
-  margin: 22px 2px 10px;
-}
-
-.add-box {
-  background: #fff9e5;
-  border: 1px solid #f2d77a;
-  border-radius: 16px;
-  padding: 15px;
-  margin-bottom: 16px;
-}
-.add-box h2 {
-  font-size: 16px;
-  margin: 0 0 12px;
-  color: var(--navy);
-}
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.form-row.three {
-  grid-template-columns: 65px 1fr 80px;
-}
-.primary-btn, .secondary-btn, .danger-btn {
-  border: 0;
-  border-radius: 11px;
-  padding: 13px 15px;
-  font-size: 15px;
-  font-weight: 900;
-  cursor: pointer;
-}
-.primary-btn {
-  background: var(--yellow);
-  color: var(--navy);
-}
-.secondary-btn {
-  background: #e8edf4;
-  color: var(--navy);
-}
-.danger-btn {
-  background: #fff0ef;
-  color: #b43d37;
-}
-.full { width: 100%; }
-
-.item-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.item-card {
-  background: white;
-  border: 2px solid var(--border);
-  border-radius: 16px;
-  padding: 13px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  align-items: center;
-  box-shadow: 0 2px 7px #172b4d08;
-}
-.item-card.done {
-  background: #f0f8f4;
-  border-color: #b9dfca;
-}
-.item-main { min-width: 0; }
-.item-name {
-  font-size: 19px;
-  font-weight: 900;
-  color: var(--navy);
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  overflow-wrap: anywhere;
-}
-.item-card.done .item-name {
-  color: #668174;
-}
-.item-hint {
-  font-size: 13px;
-  color: #53647a;
-  margin-top: 7px;
-  line-height: 1.55;
-  overflow-wrap: anywhere;
-}
-.hint-label {
-  font-weight: 900;
-  color: #8b6b14;
-}
-.quantity-text {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 5px;
-}
-.check-btn {
-  width: 66px;
-  height: 66px;
-  border: 2px solid #dce3ec;
-  background: #f8fafc;
-  border-radius: 15px;
-  color: var(--navy);
-  font-size: 27px;
-  font-weight: 900;
-  cursor: pointer;
-}
-.done .check-btn {
-  background: var(--green);
-  color: white;
-  border-color: var(--green);
-}
-.card-actions {
-  display: flex;
-  gap: 7px;
-  margin-top: 9px;
-}
-.small-btn {
-  border: 0;
-  border-radius: 7px;
-  background: #edf1f6;
-  color: #53647a;
-  padding: 7px 10px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.empty {
-  background: white;
-  border-radius: 14px;
-  padding: 25px 15px;
-  text-align: center;
-  color: var(--muted);
-}
-
-.complete-box {
-  display: none;
-  background: var(--navy);
-  color: white;
-  border-radius: 18px;
-  padding: 23px 17px;
-  text-align: center;
-  margin-top: 18px;
-}
-.complete-box.show { display: block; }
-.trophy { font-size: 46px; }
-.complete-box h2 {
-  font-size: 23px;
-  margin: 8px 0;
-}
-.complete-box p {
-  line-height: 1.6;
-  font-size: 14px;
-  color: #e0e8f2;
-}
-.report-text {
-  background: white;
-  color: var(--navy);
-  border-radius: 10px;
-  padding: 12px;
-  margin: 13px 0;
-  font-weight: 900;
-  font-size: 14px;
-}
-.report-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.reset-area {
-  text-align: center;
-  margin-top: 22px;
-}
-.reset-btn {
-  border: 0;
-  background: transparent;
-  color: #788598;
-  text-decoration: underline;
-  padding: 10px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.transfer-box {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px;
-  margin-top: 25px;
-}
-.transfer-box h2 {
-  font-size: 17px;
-  margin: 0 0 8px;
-  color: var(--navy);
-}
-.transfer-box p {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--muted);
-  margin: 0 0 13px;
-}
-.transfer-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.transfer-note {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 10px;
-}
-footer {
-  text-align: center;
-  color: #9aa5b3;
-  font-size: 11px;
-  padding: 15px;
-}
-
-@media(max-width:380px) {
-  header h1 { font-size: 21px; }
-  .item-name { font-size: 17px; }
-  .check-btn { width: 58px; height: 58px; }
-  .transfer-buttons { grid-template-columns: 1fr; }
+.gender-btn.active { background:#fff0eb; border-color:#f2ad9c; }
+.share-button { background:#e9f2e9; color:#557b58; margin-top:10px; }
+.import-button { background:#f5efeb; color:#8c7d75; margin-top:9px; }
+.transfer-note { color:#9b8c84; font-size:12px; line-height:1.7; margin:10px 0 0; }
+.footer { text-align:center; color:#b4a69e; font-size:11px; margin-top:17px; }
+@media(max-width:360px) {
+  body { padding:12px 8px 30px; }
+  .item { gap:5px; padding:10px 6px; }
+  .tap-btn { min-width:72px; padding:9px 5px; }
+  .actions { gap:0; }
 }
 </style>
 </head>
-
 <body>
+<div class="app">
+  <h1>🎒 きょうのもちもの</h1>
+  <div class="today" id="todayDate"></div>
 
-<header>
-  <h1>🧢 パパにおまかせ！</h1>
-  <p>画面の通りに準備するだけ。朝の支度チェック</p>
-</header>
+  <div class="tabs" id="tabs"></div>
 
-<main>
-
-  <div class="today" id="todayText"></div>
-
-  <div class="child-tabs" id="childTabs"></div>
-
-  <section class="profile-area">
-    <button class="profile-toggle" onclick="toggleProfile()">
-      ⚙️ 子どもの設定を開く
-    </button>
-    <div class="profile-panel" id="profilePanel">
-      <label>子どもの名前</label>
-      <input id="profileName" maxlength="20" placeholder="名前を入力">
-
-      <label>アイコン</label>
-      <div class="icon-options" id="iconOptions">
-        <button class="icon-option" onclick="setIcon('👦')">👦</button>
-        <button class="icon-option" onclick="setIcon('👧')">👧</button>
-        <button class="icon-option" onclick="setIcon('🧒')">🧒</button>
-      </div>
-
-      <button class="primary-btn full" style="margin-top:13px"
-        onclick="saveProfile()">設定を保存</button>
+  <section class="panel">
+    <div class="progress-heading">
+      <strong>🌷 準備の進み具合</strong>
+      <span class="progress-number" id="progressText">0 / 0</span>
     </div>
+    <div class="bar"><div class="bar-fill" id="progressBar"></div></div>
+    <p class="progress-hint">持ち物をタップすると、準備した数が1つ増えます。</p>
   </section>
 
-  <section class="progress-card">
-    <div class="progress-top">
-      <span>今日の準備進捗</span>
-      <span id="progressText">0 / 0 完了</span>
-    </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
-  </section>
-
-  <section class="add-box">
-    <h2>⚡ 臨時の持ち物を追加</h2>
-
-    <input id="newName" maxlength="50"
-      placeholder="例：お弁当、体操服など">
-
-    <div class="form-row">
-      <input id="newPlace" maxlength="100"
-        placeholder="収納場所">
-      <input id="newNote" maxlength="150"
-        placeholder="注意点・準備のヒント">
-    </div>
-
-    <div class="form-row three">
-      <input id="newEmoji" maxlength="4" value="🎒"
-        aria-label="アイコン">
-      <input id="newQuantity" type="number" min="1" max="99" value="1"
-        aria-label="数量">
-      <input id="newUnit" maxlength="10" value="個"
-        aria-label="単位">
-    </div>
-
-    <button class="primary-btn full" onclick="addItem()">
-      ＋ 持ち物を追加する
-    </button>
-  </section>
-
-  <h2 class="section-title" id="listTitle">📋 持ち物リスト</h2>
-  <div class="item-list" id="itemList"></div>
-
-  <section class="complete-box" id="completeBox">
-    <div class="trophy">🏆</div>
-    <h2>任務完了！完璧な準備です！</h2>
-    <p>すべての持ち物を確認しました。<br>
-      今日の朝の支度はこれでバッチリです！</p>
-    <div class="report-text" id="reportText"></div>
-    <div class="report-buttons">
-      <button class="primary-btn" onclick="copyReport()">
-        📋 報告をコピー
-      </button>
-      <button class="secondary-btn" onclick="shareReport()">
-        📤 LINEなどで共有
-      </button>
-    </div>
-  </section>
-
-  <div class="reset-area">
-    <button class="reset-btn" onclick="resetChild()">
-      ↻ この子のチェックをすべてリセット
-    </button>
+  <div class="cheer" id="cheer">
+    <div class="cheer-title">🌸 いってらっしゃい！</div>
+    <div class="cheer-message">ぜんぶ準備できました。今日も楽しい一日になりますように。</div>
   </div>
 
-  <section class="transfer-box">
-    <h2>📦 設定の引き継ぎ</h2>
-    <p>
-      2人分の名前・アイコン・持ち物・収納場所・注意点を
-      ファイルにまとめて、パパのスマホへ送れます。
-      チェック状態は引き継がれません。
-    </p>
+  <section class="panel">
+    <div class="section-title">📋 持ち物リスト</div>
+    <div id="items"></div>
+    <button class="reset-button" id="resetBtn">チェックをすべてリセット</button>
+  </section>
 
-    <div class="transfer-buttons">
-      <button class="primary-btn" onclick="exportSettings()">
-        📤 設定を書き出す
-      </button>
-      <button class="secondary-btn" onclick="chooseImport()">
-        📥 設定を読み込む
-      </button>
+  <section class="panel">
+    <div class="add-title">➕ 持ち物を追加</div>
+    <div class="preset-row">
+      <select id="presetSelect">
+        <option value="">よく使う持ち物から選ぶ</option>
+      </select>
+      <button class="gender-btn" id="presetBtn" type="button">選択</button>
     </div>
+    <div class="add-grid">
+      <input id="newIcon" value="🎒" maxlength="4" aria-label="アイコン">
+      <input id="newName" placeholder="持ち物の名前" maxlength="30">
+      <input id="newQty" type="number" min="1" max="99" value="1" aria-label="必要な数">
+      <select id="newUnit" class="wide">
+        <option>個</option><option>枚</option><option>本</option>
+        <option>セット</option><option>組</option><option>足</option>
+        <option>着</option><option>袋</option><option>冊</option>
+      </select>
+      <input id="newPlace" class="wide" placeholder="保管場所（例：玄関の棚）" maxlength="50">
+      <input id="newNote" class="wide" placeholder="メモ・注意事項（任意）" maxlength="80">
+    </div>
+    <button class="add-button" id="addBtn">この持ち物を追加する</button>
+  </section>
 
-    <input type="file" id="importFile"
-      accept=".json,application/json"
-      style="display:none" onchange="importSettings(event)">
-
-    <div class="transfer-note">
-      ※ LINEなどでJSONファイルを送受信できます。外部サーバーへの保存はありません。
+  <section class="panel">
+    <button class="settings-toggle" id="settingsToggle">⚙️ 子どもの設定を開く</button>
+    <div class="settings-content" id="settingsContent">
+      <div class="profile-title">お名前</div>
+      <div class="profile-row">
+        <input id="childName" maxlength="20" placeholder="お名前">
+      </div>
+      <div class="profile-title" style="margin-top:14px">アイコン</div>
+      <div class="profile-row">
+        <button class="gender-btn" id="boyBtn" type="button">👦 男の子</button>
+        <button class="gender-btn" id="girlBtn" type="button">👧 女の子</button>
+      </div>
     </div>
   </section>
 
-</main>
+  <section class="panel">
+    <div class="section-title">📤 家族に設定を共有</div>
+    <button class="share-button" id="shareBtn">LINEなどで設定を共有する</button>
+    <button class="import-button" id="importBtn">受け取った設定を読み込む</button>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <p class="transfer-note">
+      ママの端末で「設定を共有」を押し、共有先からLINEを選んでパパに送ってください。<br>
+      パパは受け取ったファイルを保存し、「設定を読み込む」から取り込めます。
+    </p>
+  </section>
 
-<footer>
-  毎日の持ち物準備を、もっと簡単に。
-</footer>
+  <div class="footer">入力内容はこの端末に自動保存されます</div>
+</div>
 
 <script>
-const STORAGE_KEY = "papa-morning-check-v2";
+const STORAGE_KEY = "kindergarten-check-v2";
+const LAST_DATE_KEY = "kindergarten-check-last-date";
 
-function initialData() {
-  return {
-    children: [
-      {
-        name: "こども1",
-        icon: "👦",
-        items: [
-          {
-            id: makeId(),
-            name: "水筒",
-            emoji: "🥤",
-            place: "キッチンの棚",
-            note: "麦茶を入れる",
-            quantity: 1,
-            unit: "本",
-            count: 0
-          },
-          {
-            id: makeId(),
-            name: "連絡帳",
-            emoji: "📒",
-            place: "テーブルの上",
-            note: "ママのサインを確認",
-            quantity: 1,
-            unit: "冊",
-            count: 0
-          },
-          {
-            id: makeId(),
-            name: "上履き",
-            emoji: "👟",
-            place: "玄関のシューズボックス上",
-            note: "名前が書いてあるか確認",
-            quantity: 1,
-            unit: "足",
-            count: 0
-          }
-        ]
-      },
-      {
-        name: "こども2",
-        icon: "👧",
-        items: [
-          {
-            id: makeId(),
-            name: "水筒",
-            emoji: "🥤",
-            place: "キッチンの棚",
-            note: "麦茶を入れる",
-            quantity: 1,
-            unit: "本",
-            count: 0
-          },
-          {
-            id: makeId(),
-            name: "連絡帳",
-            emoji: "📒",
-            place: "テーブルの上",
-            note: "ママのサインを確認",
-            quantity: 1,
-            unit: "冊",
-            count: 0
-          },
-          {
-            id: makeId(),
-            name: "上履き",
-            emoji: "👟",
-            place: "玄関のシューズボックス上",
-            note: "名前が書いてあるか確認",
-            quantity: 1,
-            unit: "足",
-            count: 0
-          }
-        ]
-      }
-    ]
-  };
-}
+const defaultData = {
+  children: [
+    {name:"子ども①", gender:"boy", items:[
+      {id:1,icon:"🎒",name:"通園バッグ",place:"玄関",note:"",quantity:1,unit:"個",count:0},
+      {id:2,icon:"🥤",name:"水筒",place:"キッチンの棚",note:"飲み物を入れてフタを確認",quantity:1,unit:"個",count:0},
+      {id:3,icon:"🧻",name:"ハンカチ",place:"玄関収納",note:"",quantity:1,unit:"枚",count:0}
+    ]},
+    {name:"子ども②", gender:"girl", items:[
+      {id:4,icon:"🎒",name:"通園バッグ",place:"玄関",note:"",quantity:1,unit:"個",count:0},
+      {id:5,icon:"🥤",name:"水筒",place:"キッチンの棚",note:"飲み物を入れてフタを確認",quantity:1,unit:"個",count:0},
+      {id:6,icon:"🧻",name:"ハンカチ",place:"玄関収納",note:"",quantity:1,unit:"枚",count:0}
+    ]}
+  ]
+};
 
-function makeId() {
-  return "id-" + Date.now() + "-" +
-    Math.random().toString(36).slice(2);
+const presets = [
+  ["🎒","通園バッグ","個","玄関","連絡帳や着替えが入っているか確認"],
+  ["📓","連絡帳","冊","テーブルの上","連絡事項やサインを確認"],
+  ["📔","出席ノート","冊","子どもの棚",""],
+  ["🏷️","名札","個","玄関収納",""],
+  ["👕","着替え","セット","子どもの引き出し","園の指定枚数を確認"],
+  ["👚","シャツ","枚","子どもの引き出し",""],
+  ["👖","ズボン","枚","子どもの引き出し",""],
+  ["🩲","肌着","枚","子どもの引き出し",""],
+  ["🧦","靴下","足","子どもの引き出し","左右セットで確認"],
+  ["🧥","上着","枚","玄関","気温に合わせて確認"],
+  ["🧢","帽子","個","玄関のフック","名前を確認"],
+  ["👟","靴","足","玄関",""],
+  ["👞","上履き","足","玄関の棚","名前を確認"],
+  ["🩴","サンダル","足","玄関",""],
+  ["🧻","ハンカチ","枚","玄関収納",""],
+  ["🧻","ティッシュ","個","玄関収納","ポケットに入れる"],
+  ["🧺","タオル","枚","洗面所の棚",""],
+  ["🧼","おしぼり","枚","キッチン",""],
+  ["🪥","歯ブラシ","本","洗面所","キャップを確認"],
+  ["🥛","コップ","個","キッチンの棚",""],
+  ["🦷","歯磨き粉","個","洗面所",""],
+  ["😷","マスク","枚","玄関収納","予備も確認"],
+  ["🥤","水筒","個","キッチンの棚","飲み物を入れてフタを確認"],
+  ["🍱","お弁当箱","個","冷蔵庫","保冷剤を入れる"],
+  ["🥢","箸","組","キッチンの引き出し","ケースに入れる"],
+  ["🥄","スプーン","本","キッチンの引き出し",""],
+  ["🍴","フォーク","本","キッチンの引き出し",""],
+  ["🍽️","ランチョンマット","枚","キッチンの棚",""],
+  ["👶","エプロン","枚","洗面所の棚",""],
+  ["🍼","よだれかけ","枚","子どもの引き出し",""],
+  ["🛍️","巾着袋","枚","子どもの棚",""],
+  ["🛍️","ビニール袋","枚","洗面所の棚","予備も確認"],
+  ["🧷","おむつ","枚","子どもの棚","必要枚数を確認"],
+  ["🧻","おしりふき","個","子どもの棚","残量を確認"],
+  ["🌂","傘","本","玄関","天気を確認"],
+  ["🧥","レインコート","枚","玄関",""],
+  ["🥾","長靴","足","玄関","雨の日に確認"],
+  ["🏊","水着","セット","クローゼット",""],
+  ["🏖️","プールバッグ","個","クローゼット","タオルも確認"],
+  ["🩱","水泳帽","個","クローゼット",""],
+  ["🧴","日焼け止め","個","洗面所",""],
+  ["🧣","防寒具","枚","クローゼット","気温に合わせて確認"],
+  ["🧸","お気に入りのおもちゃ","個","子どもの棚","持参してよい日か確認"],
+  ["📁","作品入れ","個","クローゼット",""],
+  ["🧺","お昼寝用タオル","枚","クローゼット",""],
+  ["🛏️","シーツ","枚","クローゼット",""],
+  ["📝","その他・自由入力","個","","名前や場所を入力してください"]
+];
+
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
 }
 
 function normalizeItem(item) {
+  const quantity = Math.max(1,Math.min(99,Number(item.quantity)||1));
   return {
-    id: makeId(),
-    name: String(item.name || "持ち物"),
-    emoji: String(item.emoji || "🎒"),
-    place: String(item.place || ""),
-    note: String(item.note || ""),
-    quantity: Math.max(1, Math.min(99, Number(item.quantity) || 1)),
-    unit: String(item.unit || "個"),
-    count: Math.max(0, Math.min(
-      Number(item.quantity) || 1,
-      Number(item.count) || 0
-    ))
+    id:item.id || Date.now()+Math.random(),
+    icon:item.icon || "🎒",
+    name:item.name || "持ち物",
+    place:item.place || "",
+    note:item.note || "",
+    quantity,
+    unit:item.unit || "個",
+    count:Math.max(0,Math.min(quantity,Number(item.count ?? (item.done ? quantity : 0))||0))
   };
 }
 
 function loadData() {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.children && parsed.children.length === 2) {
-        parsed.children = parsed.children.map(child => ({
-          name: String(child.name || "こども"),
-          icon: String(child.icon || "🧒"),
-          items: Array.isArray(child.items)
-            ? child.items.map(normalizeItem)
-            : []
-        }));
-        return parsed;
-      }
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!saved || !Array.isArray(saved.children)) return clone(defaultData);
+
+    saved.children = saved.children.slice(0,2);
+    while (saved.children.length < 2) {
+      saved.children.push(clone(defaultData.children[saved.children.length]));
     }
-  } catch (e) {}
-  return initialData();
+
+    saved.children.forEach((child,index) => {
+      child.name = child.name || `子ども${index+1}`;
+      child.gender = child.gender || (index===0 ? "boy" : "girl");
+      if (!Array.isArray(child.items)) child.items = [];
+      child.items = child.items.map(normalizeItem);
+    });
+    return saved;
+  } catch(e) {
+    return clone(defaultData);
+  }
 }
 
 let data = loadData();
 let activeChild = 0;
-let selectedIcon = data.children[0].icon;
 
-function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+function save() {
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
 }
 
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[char]);
+function currentChild() {
+  return data.children[activeChild];
 }
 
-function todayText() {
+function dateString() {
   const d = new Date();
-  const weekdays = ["日","月","火","水","木","金","土"];
-  document.getElementById("todayText").textContent =
-    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${weekdays[d.getDay()]}）`;
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function displayDate() {
+  const d = new Date();
+  const days = ["日","月","火","水","木","金","土"];
+  document.getElementById("todayDate").textContent =
+    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）`;
+}
+
+function checkDateReset() {
+  const today = dateString();
+  const last = localStorage.getItem(LAST_DATE_KEY);
+  if (last && last !== today) {
+    data.children.forEach(child => child.items.forEach(item => item.count = 0));
+    save();
+    render();
+  }
+  localStorage.setItem(LAST_DATE_KEY,today);
+  displayDate();
 }
 
 function render() {
-  todayText();
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
 
-  const child = data.children[activeChild];
+  data.children.forEach((child,i) => {
+    const button = document.createElement("button");
+    button.className = "tab" + (i===activeChild ? " active" : "");
+    button.textContent = `${child.gender==="girl" ? "👧" : "👦"} ${child.name}`;
+    button.onclick = () => {
+      activeChild=i;
+      render();
+    };
+    tabs.appendChild(button);
+  });
 
-  document.getElementById("childTabs").innerHTML =
-    data.children.map((c, i) => `
-      <button class="child-tab ${i === activeChild ? "active" : ""}"
-        onclick="selectChild(${i})">
-        ${escapeHTML(c.icon)} ${escapeHTML(c.name)}
-      </button>
-    `).join("");
+  const child = currentChild();
+  const total = child.items.reduce((s,item)=>s+item.quantity,0);
+  const done = child.items.reduce((s,item)=>s+item.count,0);
 
-  document.getElementById("listTitle").textContent =
-    `📋 ${child.name}の持ち物`;
+  document.getElementById("progressText").textContent = `${done} / ${total}`;
+  document.getElementById("progressBar").style.width =
+    total ? `${done/total*100}%` : "0%";
 
-  document.getElementById("profileName").value = child.name;
-  selectedIcon = child.icon;
-  renderIconOptions();
+  const allDone = child.items.length>0 && done===total;
+  document.getElementById("cheer").classList.toggle("show",allDone);
 
-  const items = child.items;
-  const total = items.reduce((sum, item) => sum + item.quantity, 0);
-  const done = items.reduce((sum, item) => sum + item.count, 0);
-  const percent = total ? Math.round(done / total * 100) : 0;
+  const list = document.getElementById("items");
+  list.innerHTML = "";
 
-  document.getElementById("progressText").textContent =
-    `${done} / ${total} 完了`;
+  if (!child.items.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "持ち物がまだありません。下から追加してください。";
+    list.appendChild(empty);
+  }
 
-  document.getElementById("progressFill").style.width =
-    percent + "%";
-
-  const sorted = [...items].sort((a, b) =>
-    Number(a.count >= a.quantity) - Number(b.count >= b.quantity)
+  const sorted = [...child.items].sort((a,b) =>
+    Number(a.count>=a.quantity)-Number(b.count>=b.quantity)
   );
 
-  document.getElementById("itemList").innerHTML = sorted.length
-    ? sorted.map(item => {
-        const completed = item.count >= item.quantity;
-        return `
-          <article class="item-card ${completed ? "done" : ""}">
-            <div class="item-main">
-              <div class="item-name">
-                ${escapeHTML(item.emoji)}
-                ${escapeHTML(item.name)}
-              </div>
+  sorted.forEach(item => {
+    const complete = item.count>=item.quantity;
+    const row = document.createElement("div");
+    row.className = "item" + (complete ? " complete" : "");
 
-              <div class="item-hint">
-                <div>
-                  <span class="hint-label">📍 場所：</span>
-                  ${escapeHTML(item.place || "未設定")}
-                </div>
-                ${item.note ? `
-                  <div>
-                    <span class="hint-label">💡 注意：</span>
-                    ${escapeHTML(item.note)}
-                  </div>
-                ` : ""}
-              </div>
+    const icon = document.createElement("div");
+    icon.className = "item-icon";
+    icon.textContent = item.icon;
 
-              <div class="quantity-text">
-                ${completed ? "確認完了！" :
-                  `確認数：${item.count} / ${item.quantity}${escapeHTML(item.unit)}`}
-              </div>
+    const main = document.createElement("div");
+    main.className = "item-main";
 
-              <div class="card-actions">
-                <button class="small-btn"
-                  onclick="editItem('${item.id}')">✏️ 編集</button>
-                <button class="small-btn"
-                  onclick="deleteItem('${item.id}')">削除</button>
-              </div>
-            </div>
+    const name = document.createElement("div");
+    name.className = "item-name";
+    name.textContent = item.name;
 
-            <button class="check-btn"
-              aria-label="確認数を変更"
-              onclick="toggleItem('${item.id}')">
-              ${completed ? "✓" : "+"}
-            </button>
-          </article>
-        `;
-      }).join("")
-    : `<div class="empty">
-        持ち物はまだありません。<br>
-        上から追加できます。
-      </div>`;
+    const note = document.createElement("div");
+    note.className = "item-note";
 
-  const allDone = total > 0 && done === total;
-  document.getElementById("completeBox")
-    .classList.toggle("show", allDone);
+    const details = [];
+    if (item.place) details.push(`📍 ${item.place}`);
+    details.push(`${item.count} / ${item.quantity}${item.unit}`);
+    if (item.note) details.push(item.note);
+    note.textContent = details.join("　");
 
-  document.getElementById("reportText").textContent =
-    `準備完了しました！（持ち物${total}点すべて確認済み）`;
-}
+    main.append(name,note);
 
-function selectChild(index) {
-  activeChild = index;
-  render();
-}
+    const tap = document.createElement("button");
+    tap.className = "tap-btn";
+    tap.textContent = complete ? "✓ 完了" : `＋ ${item.count}/${item.quantity}`;
+    tap.setAttribute("aria-label",`${item.name}の準備数を増やす`);
+    tap.onclick = () => {
+      item.count = complete ? 0 : item.count+1;
+      save();
+      render();
+    };
 
-function toggleProfile() {
-  document.getElementById("profilePanel")
-    .classList.toggle("open");
-}
+    const actions = document.createElement("div");
+    actions.className = "actions";
 
-function renderIconOptions() {
-  document.querySelectorAll(".icon-option").forEach(button => {
-    button.classList.toggle(
-      "selected",
-      button.textContent.trim() === selectedIcon
-    );
-  });
-}
+    const edit = document.createElement("button");
+    edit.className = "small-btn";
+    edit.textContent = "編集";
+    edit.onclick = () => editItem(item);
 
-function setIcon(icon) {
-  selectedIcon = icon;
-  renderIconOptions();
-}
+    const del = document.createElement("button");
+    del.className = "small-btn";
+    del.textContent = "削除";
+    del.onclick = () => {
+      if (confirm(`「${item.name}」を削除しますか？`)) {
+        child.items = child.items.filter(x=>x.id!==item.id);
+        save();
+        render();
+      }
+    };
 
-function saveProfile() {
-  const name = document.getElementById("profileName").value.trim();
-
-  if (!name) {
-    alert("名前を入力してください。");
-    return;
-  }
-
-  data.children[activeChild].name = name;
-  data.children[activeChild].icon = selectedIcon;
-
-  saveData();
-  render();
-  document.getElementById("profilePanel").classList.remove("open");
-  alert("子どもの設定を保存しました。");
-}
-
-function addItem() {
-  const name = document.getElementById("newName").value.trim();
-  const place = document.getElementById("newPlace").value.trim();
-  const note = document.getElementById("newNote").value.trim();
-  const emoji = document.getElementById("newEmoji").value.trim() || "🎒";
-  const quantity = Math.max(1, Math.min(
-    99, Number(document.getElementById("newQuantity").value) || 1
-  ));
-  const unit = document.getElementById("newUnit").value.trim() || "個";
-
-  if (!name) {
-    alert("持ち物の名前を入力してください。");
-    return;
-  }
-
-  data.children[activeChild].items.push({
-    id: makeId(),
-    name, emoji, place, note, quantity, unit,
-    count: 0
+    actions.append(edit,del);
+    row.append(icon,main,tap,actions);
+    list.appendChild(row);
   });
 
-  document.getElementById("newName").value = "";
-  document.getElementById("newPlace").value = "";
-  document.getElementById("newNote").value = "";
-  document.getElementById("newEmoji").value = "🎒";
-  document.getElementById("newQuantity").value = "1";
-  document.getElementById("newUnit").value = "個";
-
-  saveData();
-  render();
+  document.getElementById("childName").value = child.name;
+  document.getElementById("boyBtn").classList.toggle("active",child.gender==="boy");
+  document.getElementById("girlBtn").classList.toggle("active",child.gender==="girl");
 }
 
-function toggleItem(id) {
-  const item = data.children[activeChild].items
-    .find(item => item.id === id);
-
-  if (!item) return;
-
-  if (item.count >= item.quantity) {
-    item.count = 0;
-  } else {
-    item.count++;
-  }
-
-  saveData();
-  render();
-}
-
-function editItem(id) {
-  const item = data.children[activeChild].items
-    .find(item => item.id === id);
-
-  if (!item) return;
-
-  const name = prompt("持ち物の名前", item.name);
-  if (name === null) return;
+function editItem(item) {
+  const name = prompt("持ち物の名前",item.name);
+  if (name===null) return;
   if (!name.trim()) {
     alert("名前を入力してください。");
     return;
   }
 
-  const place = prompt("収納場所・置いてある場所", item.place);
-  if (place === null) return;
+  const icon = prompt("アイコン（絵文字）",item.icon);
+  if (icon===null) return;
 
-  const note = prompt("注意点・準備するときのヒント", item.note);
-  if (note === null) return;
-
-  const quantityText = prompt("必要な数量", item.quantity);
-  if (quantityText === null) return;
-
-  const quantity = Number(quantityText);
-  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
-    alert("数量は1〜99の整数で入力してください。");
+  const qtyText = prompt("必要な数（1〜99）",String(item.quantity));
+  if (qtyText===null) return;
+  const qty = Number(qtyText);
+  if (!Number.isInteger(qty)||qty<1||qty>99) {
+    alert("必要な数は1〜99の整数で入力してください。");
     return;
   }
 
-  const unit = prompt("単位（個・本・枚など）", item.unit);
-  if (unit === null) return;
+  const unit = prompt("単位（例：個、枚、本、セット）",item.unit);
+  if (unit===null) return;
 
-  const emoji = prompt("アイコン・絵文字", item.emoji);
-  if (emoji === null) return;
+  const place = prompt("保管場所",item.place||"");
+  if (place===null) return;
+
+  const note = prompt("メモ・注意事項（不要なら空欄）",item.note||"");
+  if (note===null) return;
 
   item.name = name.trim();
+  item.icon = icon.trim()||"🎒";
+  item.quantity = qty;
+  item.unit = unit.trim()||"個";
   item.place = place.trim();
   item.note = note.trim();
-  item.quantity = quantity;
-  item.unit = unit.trim() || "個";
-  item.emoji = emoji.trim() || "🎒";
-  item.count = Math.min(item.count, quantity);
+  item.count = Math.min(item.count,qty);
 
-  saveData();
+  save();
   render();
 }
 
-function deleteItem(id) {
-  if (!confirm("この持ち物を削除しますか？")) return;
+function fillPreset() {
+  const value = document.getElementById("presetSelect").value;
+  if (value==="") {
+    alert("持ち物を選んでください。");
+    return;
+  }
 
-  data.children[activeChild].items =
-    data.children[activeChild].items.filter(item => item.id !== id);
+  const [icon,name,unit,place,note] = presets[Number(value)];
 
-  saveData();
-  render();
+  document.getElementById("newIcon").value = icon;
+  document.getElementById("newName").value =
+    name==="その他・自由入力" ? "" : name;
+  document.getElementById("newQty").value = 1;
+  document.getElementById("newUnit").value = unit;
+  document.getElementById("newPlace").value = place;
+  document.getElementById("newNote").value =
+    name==="その他・自由入力" ? "" : note;
+
+  document.getElementById("newName").focus();
 }
 
-function resetChild() {
-  if (!confirm("この子のチェックをすべて未完了に戻しますか？")) return;
+presets.forEach((p,i) => {
+  const option = document.createElement("option");
+  option.value = i;
+  option.textContent = `${p[0]} ${p[1]}`;
+  document.getElementById("presetSelect").appendChild(option);
+});
 
-  data.children[activeChild].items.forEach(item => {
-    item.count = 0;
+document.getElementById("presetBtn").onclick = fillPreset;
+
+document.getElementById("addBtn").onclick = () => {
+  const name = document.getElementById("newName").value.trim();
+  const quantity = Number(document.getElementById("newQty").value);
+
+  if (!name) {
+    alert("持ち物の名前を入力してください。");
+    return;
+  }
+  if (!Number.isInteger(quantity)||quantity<1||quantity>99) {
+    alert("必要な数は1〜99で入力してください。");
+    return;
+  }
+
+  currentChild().items.push({
+    id:Date.now()+Math.random(),
+    icon:document.getElementById("newIcon").value.trim()||"🎒",
+    name,
+    quantity,
+    unit:document.getElementById("newUnit").value,
+    place:document.getElementById("newPlace").value.trim(),
+    note:document.getElementById("newNote").value.trim(),
+    count:0
   });
 
-  saveData();
+  document.getElementById("newName").value = "";
+  document.getElementById("newIcon").value = "🎒";
+  document.getElementById("newQty").value = "1";
+  document.getElementById("newPlace").value = "";
+  document.getElementById("newNote").value = "";
+  document.getElementById("presetSelect").value = "";
+
+  save();
   render();
-}
+};
 
-function getReport() {
-  const child = data.children[activeChild];
-  const total = child.items.reduce(
-    (sum, item) => sum + item.quantity, 0
-  );
-  return `${child.name}の準備完了しました！（持ち物${total}点すべて確認済み）`;
-}
+document.getElementById("childName").addEventListener("change",e => {
+  currentChild().name = e.target.value.trim()||`子ども${activeChild+1}`;
+  save();
+  render();
+});
 
-async function copyReport() {
-  const text = getReport();
+document.getElementById("boyBtn").onclick = () => {
+  currentChild().gender = "boy";
+  save();
+  render();
+};
 
-  try {
-    await navigator.clipboard.writeText(text);
-    alert("報告文をコピーしました！");
-  } catch (e) {
-    window.prompt("こちらをコピーしてください", text);
-  }
-}
+document.getElementById("girlBtn").onclick = () => {
+  currentChild().gender = "girl";
+  save();
+  render();
+};
 
-async function shareReport() {
-  const text = getReport();
+document.getElementById("settingsToggle").onclick = () => {
+  const content = document.getElementById("settingsContent");
+  const open = content.classList.toggle("open");
+  document.getElementById("settingsToggle").textContent =
+    open ? "⚙️ 子どもの設定を閉じる" : "⚙️ 子どもの設定を開く";
+};
 
-  if (navigator.share) {
-    try {
-      await navigator.share({ text });
-    } catch (e) {}
-  } else {
-    await copyReport();
-  }
-}
+document.getElementById("resetBtn").onclick = () => {
+  if (!confirm("この子の準備チェックをすべてリセットしますか？")) return;
+  currentChild().items.forEach(item=>item.count=0);
+  save();
+  render();
+};
 
-/* -------------------------
-   JSON設定の書き出し
-------------------------- */
-
-function exportSettings() {
+/* 設定を共有するためのファイルを作成 */
+function makeSettingsFile() {
   const exportData = {
-    app: "papa-morning-check",
-    version: 1,
-    exportedAt: new Date().toISOString(),
-
-    children: data.children.map(child => ({
-      name: child.name,
-      icon: child.icon,
-      items: child.items.map(item => ({
-        name: item.name,
-        emoji: item.emoji,
-        place: item.place,
-        note: item.note,
-        quantity: item.quantity,
-        unit: item.unit
+    app:"kindergarten-check",
+    version:2,
+    exportedAt:new Date().toISOString(),
+    children:data.children.map(child => ({
+      name:child.name,
+      gender:child.gender,
+      items:child.items.map(item => ({
+        icon:item.icon,
+        name:item.name,
+        place:item.place || "",
+        note:item.note || "",
+        quantity:item.quantity,
+        unit:item.unit
       }))
     }))
   };
 
-  const json = JSON.stringify(exportData, null, 2);
-  const blob = new Blob([json], {
-    type: "application/json;charset=utf-8"
-  });
-
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+  const blob = new Blob(
+    [JSON.stringify(exportData,null,2)],
+    {type:"application/json"}
+  );
 
   const date = new Date();
-  const dateText =
-    date.getFullYear() +
-    String(date.getMonth()+1).padStart(2,"0") +
-    String(date.getDate()).padStart(2,"0");
+  const dateText = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,"0")}${String(date.getDate()).padStart(2,"0")}`;
+  const file = new File(
+    [blob],
+    `もちもの設定-${dateText}.json`,
+    {type:"application/json"}
+  );
 
+  return {blob,file};
+}
+
+function downloadSettings(blob,fileName) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
   link.href = url;
-  link.download = `もちもの設定-${dateText}.json`;
-
+  link.download = fileName;
   document.body.appendChild(link);
   link.click();
   link.remove();
-
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
-/* -------------------------
-   JSON設定の読み込み
-------------------------- */
+document.getElementById("shareBtn").onclick = async () => {
+  const {blob,file} = makeSettingsFile();
 
-function chooseImport() {
+  if (navigator.share && navigator.canShare &&
+      navigator.canShare({files:[file]})) {
+    try {
+      await navigator.share({
+        files:[file],
+        title:"きょうのもちもの設定",
+        text:"持ち物リストの設定を共有します。"
+      });
+    } catch(error) {
+      if (error.name!=="AbortError") {
+        downloadSettings(blob,file.name);
+        alert("共有できなかったため、設定ファイルを保存しました。LINEに添付して送ってください。");
+      }
+    }
+  } else {
+    downloadSettings(blob,file.name);
+    alert("この端末では直接共有できないため、設定ファイルを保存しました。LINEに添付して送ってください。");
+  }
+};
+
+/* 受け取った設定ファイルを読み込む */
+document.getElementById("importBtn").onclick = () => {
   document.getElementById("importFile").click();
-}
+};
 
-function importSettings(event) {
+document.getElementById("importFile").onchange = async event => {
   const file = event.target.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
+  try {
+    const text = await file.text();
+    const imported = JSON.parse(text);
 
-  reader.onload = function() {
-    try {
-      const imported = JSON.parse(reader.result);
-
-      if (
-        imported.app !== "papa-morning-check" ||
-        imported.version !== 1 ||
-        !Array.isArray(imported.children) ||
-        imported.children.length !== 2
-      ) {
-        throw new Error("対応していない設定ファイルです。");
-      }
-
-      const newChildren = imported.children.map(child => {
-        if (
-          typeof child.name !== "string" ||
-          !Array.isArray(child.items)
-        ) {
-          throw new Error("設定ファイルの内容が正しくありません。");
-        }
-
-        return {
-          name: child.name.slice(0, 20) || "こども",
-          icon: ["👦","👧","🧒"].includes(child.icon)
-            ? child.icon : "🧒",
-
-          items: child.items.map(item => {
-            if (
-              typeof item.name !== "string" ||
-              !item.name.trim()
-            ) {
-              throw new Error("持ち物の名前が正しくありません。");
-            }
-
-            return {
-              id: makeId(),
-              name: item.name.slice(0, 50),
-              emoji: String(item.emoji || "🎒").slice(0, 4),
-              place: String(item.place || "").slice(0, 100),
-              note: String(item.note || "").slice(0, 150),
-              quantity: Math.max(1, Math.min(
-                99, Number(item.quantity) || 1
-              )),
-              unit: String(item.unit || "個").slice(0, 10),
-              count: 0
-            };
-          })
-        };
-      });
-
-      if (!confirm(
-        "現在の2人分の設定を、受け取った内容に置き換えます。\n\n" +
-        "・子どもの名前とアイコン\n" +
-        "・持ち物リスト\n" +
-        "・収納場所と注意点\n\n" +
-        "チェック状態はすべて未完了になります。\n\n" +
-        "読み込んでもよろしいですか？"
-      )) {
-        event.target.value = "";
-        return;
-      }
-
-      data.children = newChildren;
-      activeChild = 0;
-
-      saveData();
-      render();
-
-      alert("設定を読み込みました！\n2人分の持ち物リストが反映されました。");
-
-    } catch (error) {
-      alert(
-        "設定ファイルを読み込めませんでした。\n" +
-        (error.message || "ファイルの内容を確認してください。")
-      );
+    if (!imported || !Array.isArray(imported.children) ||
+        imported.children.length!==2) {
+      throw new Error("設定ファイルの形式が正しくありません。");
     }
 
-    event.target.value = "";
-  };
+    const newChildren = imported.children.map((child,index) => {
+      if (!Array.isArray(child.items)) {
+        throw new Error("持ち物リストが読み取れません。");
+      }
 
-  reader.onerror = function() {
-    alert("ファイルを読み込めませんでした。");
-    event.target.value = "";
-  };
+      return {
+        name:String(child.name || `子ども${index+1}`).slice(0,20),
+        gender:child.gender==="girl" ? "girl" : "boy",
+        items:child.items.map(item => {
+          const quantity = Number(item.quantity);
+          if (!Number.isInteger(quantity)||quantity<1||quantity>99) {
+            throw new Error("持ち物の個数に不正な値があります。");
+          }
 
-  reader.readAsText(file);
-}
+          return normalizeItem({
+            ...item,
+            quantity,
+            count:0
+          });
+        })
+      };
+    });
 
+    if (!confirm("今の2人分の設定を、受け取った設定に置き換えますか？")) {
+      event.target.value = "";
+      return;
+    }
+
+    data.children = newChildren;
+    activeChild = 0;
+    save();
+    render();
+    alert("設定を読み込みました。持ち物のチェックは未完了に戻しています。");
+  } catch(error) {
+    alert("設定ファイルを読み込めませんでした。\n" + error.message);
+  }
+
+  event.target.value = "";
+};
+
+displayDate();
+checkDateReset();
 render();
-</script>
 
+setInterval(() => {
+  const before = localStorage.getItem(LAST_DATE_KEY);
+  checkDateReset();
+  if (before !== dateString()) displayDate();
+},30000);
+
+window.addEventListener("focus",checkDateReset);
+</script>
 </body>
 </html>
