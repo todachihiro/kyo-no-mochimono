@@ -326,7 +326,7 @@ function render() {
   data.children.forEach((child,i) => {
     const button = document.createElement("button");
     button.className = "tab" + (i===activeChild ? " active" : "");
-    button.textContent = `${child.bagIcon || "🎒"} ${i===0 ? "①" : "②"} ${child.name}のカバン`;
+    button.textContent = `${child.bagIcon || "🎒"} ${child.name}のかばん`;
     button.onclick = () => {
       activeChild=i;
       render();
@@ -695,7 +695,7 @@ async function importFromUrl() {
     );
 
     const message =
-      `${newChildren[0].name}のカバン・${newChildren[1].name}のカバンの設定を受け取りました。\n`+
+      `${newChildren[0].name}のカバン・${newChildren[1].name}のかばんの設定を受け取りました。\n`+
       `持ち物は合計${itemCount}件です。\n\n`+
       `今の端末の設定を置き換えて取り込みますか？`;
 
